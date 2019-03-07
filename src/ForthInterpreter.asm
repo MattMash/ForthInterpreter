@@ -49,7 +49,7 @@ mov pc, program_stub	; 	PC <- program_stub
 jmp next	;	goto next
 
 .number: ; else if word is a number n then push n
-mov rdi, rax
+pop rdi
 call parse_int
 test rdx, rdx
 jz .unknown_word
