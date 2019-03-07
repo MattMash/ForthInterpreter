@@ -7,6 +7,7 @@ global string_copy
 global string_equals
 global exit
 global string_length
+global parse_int
 
 
 section .text

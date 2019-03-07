@@ -13,7 +13,9 @@ section .text
 
 ; ( header_addr -- xt_addr )
 native "cfa", cfa 	; takes word header address (rdi) and return xt_ value (rax)
-pop rdi
+push rbp
+mov rbp, rsp
+mov rdi, [rsp+16]	; first argument passed on the stack
 add rdi, 8
 .loop:
 	mov al, [rdi]
@@ -24,14 +26,16 @@ add rdi, 8
 
 	.end:
 	add rdi, 2
-	push rdi
-	jmp next
+	mov rax, rdi
+	pop rbp
+	ret
 
 ; ( str, lw_addr -- header_addr )
 native "find", find 	; takes location of last word in dictionary, and word to find and return address of header of word
-pop rdi			; this is the word to find
-mov rsi, [last_word]		; this is the header of the last word in the dictionary
+
+mov rsi, [rel last_word]		; this is the header of the last word in the dictionary
 .loop:
+	mov rdi, [rsp + 8]			; this is the word to find
 	push rsi
 	add rsi, 8
 	call string_equals
@@ -43,13 +47,13 @@ mov rsi, [last_word]		; this is the header of the last word in the dictionary
 	jnz .loop
 
 	.not_found:
-	sub rsp, 8	; clear stack?
+;	sub rsp, 8	; clear stack?
 	mov rax, 0
 	ret
 
 	.found:
-	mov [rsp], rsi
-	mov rax rsi
+	;mov [rsp], rsi
+	mov rax, rsi
 	ret
 
 ; ( buffer_addr -- buffer_length )
@@ -58,7 +62,7 @@ pop rdi	;
 pop rsi
 call read_word
 push rdx
-ret
+jmp next
 ; (  --  )
 native "docol", docol
 sub rstack, 8
@@ -71,10 +75,11 @@ jmp next
 native "print", print
 mov rdi, msg_test
 call print_string
-ret
+call print_newline
+jmp next
 ; ( destination_addr, source_addr -- )
 native "move_f", move_f
 pop rsi
 pop rdi
 mov rdi, rsi
-ret
+jmp next
